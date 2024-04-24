@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleMedicamentos.ConsoleApp", "src\ControleMedicamentos.ConsoleApp\ControleMedicamentos.ConsoleApp.csproj", "{6F9D638B-6A4C-4B3C-963D-126678836F89}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleMedicamentos.ConsoleApp", "ControleMedicamentos.ConsoleApp\ControleMedicamentos.ConsoleApp.csproj", "{0C4BEBED-0170-45D9-B117-81822889DD6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F9D638B-6A4C-4B3C-963D-126678836F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F9D638B-6A4C-4B3C-963D-126678836F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F9D638B-6A4C-4B3C-963D-126678836F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F9D638B-6A4C-4B3C-963D-126678836F89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C4BEBED-0170-45D9-B117-81822889DD6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C4BEBED-0170-45D9-B117-81822889DD6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C4BEBED-0170-45D9-B117-81822889DD6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C4BEBED-0170-45D9-B117-81822889DD6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {B650E091-1CD4-4D6D-9FDE-5C6B5DCB4F9B}
+		SolutionGuid = {3BABD6B2-8027-43EB-9FC7-0AEB95F1916D}
 	EndGlobalSection
 EndGlobal

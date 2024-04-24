@@ -34,13 +34,19 @@
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
-            string descricao = RecebeString(" Informe a descrição: ");
-            string fornecedor = RecebeString(" Informe o fornecedor: ");
-            int quantidade = RecebeInt(" Informe a quantidade em estoque: ");
-            int quantidadeCritica = RecebeInt(" Informe a quantidade mínima para este medicamento: ");
-            repositorioMedicamento.Cadastrar(nome, descricao, fornecedor, quantidade, quantidadeCritica);
-            RealizadoComSucesso("cadastrado");
+            int index = repositorioMedicamento.MedicamentoJaExiste(nome);
+            if (index != -1) MedicamentoJaExiste(repositorioMedicamento, index, ref sair);
+            else
+            {
+                string descricao = RecebeString(" Informe a descrição: ");
+                string fornecedor = RecebeString(" Informe o fornecedor: ");
+                int quantidade = RecebeInt(" Informe a quantidade em estoque: ");
+                int quantidadeCritica = RecebeInt(" Informe a quantidade mínima para este medicamento: ");
+                repositorioMedicamento.Cadastrar(nome, descricao, fornecedor, quantidade, quantidadeCritica);
+                RealizadoComSucesso("cadastrado");
+            }
         }
+
         public void PesquisaMedicamento(ref bool sair, ref bool repetir)
         {
             CabecalhoMedicamentos();
@@ -117,7 +123,7 @@
         public string RecebeString(string texto)
         {
             Console.Write(texto);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
             return Console.ReadLine().ToUpper();
         }
         public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
@@ -144,7 +150,7 @@
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\n Não é um número! Tente novamente");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
 
             quantidade = Convert.ToString(RecebeInt(texto));//Para garantir que, ao sair do loop, o método "RecebeInt" não vai puxar a "quantidade" original (nula)
         }
@@ -152,8 +158,23 @@
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\n      Medicamento {texto} com sucesso!");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
             string opcao = RecebeString("     'Enter' para voltar ao menu principal ");
+        }
+        public void MedicamentoJaExiste(RepositorioMedicamento repositorioMedicamento, int index, ref bool sair)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(" Este medicamento já existe!");
+            Console.ResetColor();
+            string opcao = RecebeString("\n 1. para retornar ao menu\n 2. para atualizar a quantidade\n S. para sair\n\n Digite: ");
+            bool repetir = false;
+            switch (opcao)
+            {
+                case "1": break;
+                case "2": repositorioMedicamento.AtualizarQnt(RecebeInt("\n Informe a nova quantidade: "), index); break;
+                case "S": sair = true; break;
+                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+            }
         }
         //Auxiliar Pesquisa
         public void Pesquisa(RepositorioMedicamento repositorioMedicamento, int index)
@@ -163,7 +184,7 @@
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}   Quantidade baixa!\n\n");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
             }
             else Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}\n\n");
         }
@@ -179,7 +200,7 @@
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\n\n\t   Medicamento não existente!");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
         }
         //Auxiliar Visualizar
         public void EstoqueVazio(ref bool sair, ref bool repetir)
@@ -187,14 +208,14 @@
             Console.WriteLine("------------------------------------------------\n");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("      Não existem medicamentos em estoque");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
             ParaRetornarAoMenu(ref sair, ref repetir);
         }
         public void Visualizar(RepositorioMedicamento repositorioMedicamento)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
 
             for (int i = 0; i < repositorioMedicamento.medicamento.Length; i++)
             {
@@ -205,7 +226,7 @@
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write($"{repositorioMedicamento.medicamento[i].quantidade}\n");
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.ResetColor();
                         Console.Write("------------------------------------------------\n");
                     }
                     else Console.Write($"{repositorioMedicamento.medicamento[i].quantidade}\n------------------------------------------------\n");
@@ -249,14 +270,14 @@
             Console.WriteLine("\t\t    Editar");
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
 
             Console.Write($" {objetoAuxiliar.nome}\t| {objetoAuxiliar.descricao}\t\t| {objetoAuxiliar.fornecedor}\t\t| ");
             if (objetoAuxiliar.quantidade <= objetoAuxiliar.quantidadeCritica)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write($"{objetoAuxiliar.quantidade}\n");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ResetColor();
                 Console.Write("------------------------------------------------\n");
             }
             else Console.Write($"{objetoAuxiliar.quantidade}\n------------------------------------------------\n");

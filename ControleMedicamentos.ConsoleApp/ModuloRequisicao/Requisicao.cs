@@ -4,7 +4,15 @@
     {
         public string medicamento {  get; set; }
         public string paciente { get; set; }
-        public int posologia { get; private set; }
-        public DateTime dataValidade { get; private set; }
+        public int posologia { get; set; }
+        public DateTime dataValidade { get; set; }
+
+        public Requisicao(string medicamento, string paciente, int posologia, DateTime dataValidade)
+        {
+            this.medicamento = medicamento;
+            this.paciente = paciente;
+            this.posologia = posologia;
+            this.dataValidade = dataValidade;
+        }
     }
 }

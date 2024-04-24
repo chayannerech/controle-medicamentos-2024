@@ -1,5 +1,6 @@
 ﻿using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
 using ControleMedicamentos.ConsoleApp.ModuloPaciente;
+using ControleMedicamentos.ConsoleApp.ModuloRequisicao;
 using Controlepacientes.ConsoleApp.ModuloPaciente;
 using System.Security.Cryptography.X509Certificates;
 
@@ -10,14 +11,15 @@ namespace ControleMedicamentos.ConsoleApp
         static void Main(string[] args)
         {
             TelaCadastroMedicamento telaMedicamento = new TelaCadastroMedicamento();
+            TelaCadastroRequisicao telaRequisicao = new TelaCadastroRequisicao();
             TelaCadastroPaciente telaPaciente = new TelaCadastroPaciente();
             bool sair = false;
 
-            do Menu(ref sair, telaMedicamento, telaPaciente);
+            do Menu(ref sair, telaMedicamento, telaPaciente, telaRequisicao);
             while (!sair);
         }
 
-        static void Menu(ref bool sair, TelaCadastroMedicamento telaMedicamento, TelaCadastroPaciente telaPaciente)
+        static void Menu(ref bool sair, TelaCadastroMedicamento telaMedicamento, TelaCadastroPaciente telaPaciente, TelaCadastroRequisicao telaRequisicao)
         {
             Cabecalho();
 
@@ -25,7 +27,7 @@ namespace ControleMedicamentos.ConsoleApp
             switch (opcao)
             {
                 case "1": telaMedicamento.MenuMedicamento(ref sair); break ;
-                case "2": Console.WriteLine("requisição"); break;
+                case "2": telaRequisicao.MenuRequisicao(ref sair); break;
                 case "3": telaPaciente.MenuPaciente(ref sair); break;
                 case "S": sair = true; break;
                 default: OpcaoInvalida(opcao, ref sair); break;

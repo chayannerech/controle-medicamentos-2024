@@ -117,8 +117,8 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         public void CabecalhoPaciente()
         {
             Console.Clear();
-            Console.WriteLine("------------------------------------------------\n  Controle de Pacientes dos Postos de Saúde\n------------------------------------------------");
-            Console.WriteLine("\t    GESTÃO DE pacienteS");
+            Console.WriteLine("------------------------------------------------\n  Controle de Medicamentos dos Postos de Saúde\n------------------------------------------------");
+            Console.WriteLine("\t    GESTÃO DE PACIENTES");
         }
         public string RecebeString(string texto)
         {

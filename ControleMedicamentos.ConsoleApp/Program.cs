@@ -11,8 +11,8 @@ namespace ControleMedicamentos.ConsoleApp
         static void Main(string[] args)
         {
             TelaCadastroMedicamento telaMedicamento = new TelaCadastroMedicamento();
-            TelaCadastroRequisicao telaRequisicao = new TelaCadastroRequisicao();
             TelaCadastroPaciente telaPaciente = new TelaCadastroPaciente();
+            TelaCadastroRequisicao telaRequisicao = new TelaCadastroRequisicao(telaPaciente, telaMedicamento);
             bool sair = false;
 
             do Menu(ref sair, telaMedicamento, telaPaciente, telaRequisicao);

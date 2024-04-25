@@ -4,7 +4,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
 {
     internal class TelaCadastroPaciente
     {
-        RepositorioPaciente repositorioPaciente = new RepositorioPaciente();
+        public RepositorioPaciente repositorioPaciente = new RepositorioPaciente();
 
         public void MenuPaciente(ref bool sair)
         {
@@ -37,12 +37,12 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
 
             string nome = RecebeString("\n Informe o nome: ");
             int index = repositorioPaciente.PacienteJaExiste(nome);
-            if (index != -1) PacienteJaExiste(repositorioPaciente, index, ref sair);
+            if (index != -1) PacienteJaExiste(ref sair);
             else
             {
-                string cpf = RecebeString(" Informe a descrição: ");
-                string endereco = RecebeString(" Informe o fornecedor: ");
-                string cartaoSUS = RecebeString(" Informe a quantidade em estoque: ");
+                string cpf = RecebeString(" Informe o cpf: ");
+                string endereco = RecebeString(" Informe o endereço: ");
+                string cartaoSUS = RecebeString(" Informe o cartão SUS: ");
                 repositorioPaciente.Cadastrar(nome, cpf, endereco, cartaoSUS);
                 RealizadoComSucesso("cadastrado");
             }
@@ -113,12 +113,13 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             }
         }
 
+
         //Auxiliar Menu
         public void CabecalhoPaciente()
         {
             Console.Clear();
             Console.WriteLine("------------------------------------------------\n  Controle de Medicamentos dos Postos de Saúde\n------------------------------------------------");
-            Console.WriteLine("\t    GESTÃO DE PACIENTES");
+            Console.WriteLine("\t      GESTÃO DE PACIENTES");
         }
         public string RecebeString(string texto)
         {
@@ -134,6 +135,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             if (opcao == "S") sair = true;
             else if (opcao != "") OpcaoInvalida(ref opcao, ref sair, ref repetir);
         }
+
         //Auxiliar Cadastro
         public void RealizadoComSucesso(string texto)
         {
@@ -142,7 +144,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             Console.ResetColor();
             string opcao = RecebeString("     'Enter' para voltar ao menu principal ");
         }
-        public void PacienteJaExiste(RepositorioPaciente repositorioPaciente, int index, ref bool sair)
+        public void PacienteJaExiste(ref bool sair)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" Este paciente já existe!");
@@ -150,6 +152,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             bool repetir = false;
             ParaRetornarAoMenu(ref sair, ref repetir);
         }
+
         //Auxiliar Pesquisa
         public void Pesquisa(RepositorioPaciente repositorioPaciente, int index) => Console.WriteLine($"\n paciente = {repositorioPaciente.pacientes[index].nome}\n CPF = {repositorioPaciente.pacientes[index].cpf}\n Endereço = {repositorioPaciente.pacientes[index].endereco}\n Cartão SUS = {repositorioPaciente.pacientes[index].cartaoSUS}\n");
         public void ParaRetornarAoMenu(ref bool sair, ref bool repetir)
@@ -166,6 +169,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             Console.WriteLine("\n\n\t   Paciente não existente!");
             Console.ResetColor();
         }
+
         //Auxiliar Visualizar
         public void SemPacientes(ref bool sair, ref bool repetir)
         {
@@ -186,6 +190,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
                 if (repositorioPaciente.pacientes[i] != null) Console.Write($" {repositorioPaciente.pacientes[i].nome}\t| {repositorioPaciente.pacientes[i].cpf}\t\t| {repositorioPaciente.pacientes[i].endereco}\t\t| {repositorioPaciente.pacientes[i].cartaoSUS}\n------------------------------------------------------\n");
             }
         }
+
         //Auxiliar Editar
         public void NomeValidoParaEdicao(RepositorioPaciente repositorioPaciente, int indexEditar, ref bool sair, ref bool repetir)
         {

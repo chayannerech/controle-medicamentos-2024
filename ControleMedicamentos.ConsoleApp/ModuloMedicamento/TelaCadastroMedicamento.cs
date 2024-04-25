@@ -2,7 +2,7 @@
 {
     internal class TelaCadastroMedicamento
     {
-        RepositorioMedicamento repositorioMedicamento = new RepositorioMedicamento();
+        public RepositorioMedicamento repositorioMedicamento = new RepositorioMedicamento();
 
         public void MenuMedicamento(ref bool sair)
         {

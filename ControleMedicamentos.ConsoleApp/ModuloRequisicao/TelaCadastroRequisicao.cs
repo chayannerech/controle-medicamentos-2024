@@ -1,8 +1,19 @@
-﻿namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
+﻿using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
+using ControleMedicamentos.ConsoleApp.ModuloPaciente;
+using Controlepacientes.ConsoleApp.ModuloPaciente;
+
+namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
 {
     internal class TelaCadastroRequisicao
     {
+        TelaCadastroPaciente telaPaciente;
+        TelaCadastroMedicamento telaMedicamento;
         RepositorioRequisicao repositorioRequisicao = new RepositorioRequisicao();
+        public TelaCadastroRequisicao(TelaCadastroPaciente telaPaciente, TelaCadastroMedicamento telaMedicamento)
+        {
+            this.telaPaciente = telaPaciente;
+            this.telaMedicamento = telaMedicamento;
+        }
 
         public void MenuRequisicao(ref bool sair)
         {
@@ -13,13 +24,14 @@
                 Console.WriteLine("------------------------------------------------");
 
                 repetir = false;
-                string opcao = RecebeString("\n        1. Cadastrar uma nova requisição\n\t   2. Visualizar requisiçãos\n\t      3. Editar requisição\n\t     4. Excluir requisição\n\n\t R. Retornar ao menu principal\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
+                string opcao = RecebeString("\n        1. Cadastrar uma nova requisição\n\t   2. Visualizar requisições\n\t      3. Editar requisição\n\t     4. Excluir requisição\n         5. Dar baixa na requisição\n\n\t R. Retornar ao menu principal\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
                 switch (opcao)
                 {
                     case "1": CadastroRequisicao(ref sair); break;
                     case "2": VisualizarRequisicao(ref sair, ref repetir); break;
                     case "3": EditarRequisicao(ref sair, ref repetir); break;
                     case "4": ExcluirRequisicao(ref sair, ref repetir); break;
+                    case "5": DarBaixaRequisicao(ref sair, ref repetir); break;
                     case "S": sair = true; break;
                     case "R": break;
                     default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
@@ -32,18 +44,28 @@
             CabecalhoRequisicao();
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
-            string medicamento = RecebeString("\n Informe o medicamento: ");
-            string paciente = RecebeString(" Informe o paciente: ");
-            int posologia = RecebeInt(" Informe a posologia: ");
-            DateTime dataValidade = Convert.ToDateTime(RecebeString(" Informe a data de validade: "));
-            repositorioRequisicao.Cadastrar(medicamento, paciente, posologia, dataValidade);
-            RealizadoComSucesso("cadastrado");
+            string paciente = RecebeString(" Informe o nome do paciente: ");
+            int jaExiste = telaPaciente.repositorioPaciente.PacienteJaExiste(paciente);
+            if (jaExiste == -1) PacienteNaoCadastrado(ref sair);
+            else
+            {
+                string medicamento = RecebeString(" Informe o medicamento: ");
+                jaExiste = telaMedicamento.repositorioMedicamento.MedicamentoJaExiste(medicamento);
+                if (jaExiste == -1) MedicamentoNaoCadastrado(ref sair);
+                else
+                {
+                    int posologia = RecebeInt(" Informe a posologia: ");
+                    DateTime dataValidade = RecebeData(" Informe a data de validade: ");
+
+                    repositorioRequisicao.Cadastrar(medicamento, paciente, posologia, dataValidade);
+                    RealizadoComSucesso("cadastrado");
+                }
+            }
         }
         public void VisualizarRequisicao(ref bool sair, ref bool repetir)
         {
             CabecalhoRequisicao();
             Console.WriteLine("\t\t  Visualizar");
-
             if (repositorioRequisicao.NaoHaRequisicao()) SemRequisicao(ref sair, ref repetir);
             else
             {
@@ -60,9 +82,9 @@
             else
             {
                 Visualizar(repositorioRequisicao);
-                int indexEditar = repositorioRequisicao.PesquisarIndex(RecebeString("\n Informe o medicamento a editar: "));
+                int idEditar = repositorioRequisicao.PesquisarIndex(RecebeString("\n Informe o ID que deseja editar: "));
 
-                if (indexEditar != -1) NomeValidoParaEdicao(repositorioRequisicao, indexEditar, ref sair, ref repetir);
+                if (idEditar != -1) IdValidoParaEdicao(repositorioRequisicao, idEditar, ref sair, ref repetir);
                 else
                 {
                     RequisicaoNaoExiste();
@@ -79,12 +101,43 @@
             else
             {
                 Visualizar(repositorioRequisicao);
-                int indexExcluir = repositorioRequisicao.PesquisarIndex(RecebeString("\n Informe o medicamento a excluir: "));
+                int indexExcluir = repositorioRequisicao.PesquisarIndex(RecebeString("\n Informe o ID que deseja excluir: "));
 
                 if (indexExcluir != -1)
                 {
                     repositorioRequisicao.Excluir(indexExcluir);
                     RealizadoComSucesso("excluido");
+                }
+                else
+                {
+                    RequisicaoNaoExiste();
+                    ParaRetornarAoMenu(ref sair, ref repetir);
+                }
+            }
+        }
+        public void DarBaixaRequisicao(ref bool sair, ref bool repetir)
+        {
+            CabecalhoRequisicao();
+            Console.WriteLine("\t\t   Dar Baixa");
+
+            if (repositorioRequisicao.NaoHaRequisicao()) SemRequisicao(ref sair, ref repetir);
+            else
+            {
+                Visualizar(repositorioRequisicao);
+                int indexDarBaixa = repositorioRequisicao.PesquisarIndex(RecebeString("\n Informe o ID que deseja dar baixa: "));
+
+                if (indexDarBaixa != -1)
+                {
+                    telaMedicamento.repositorioMedicamento.DarBaixa(indexDarBaixa, repositorioRequisicao.requisicao[indexDarBaixa].medicamento, repositorioRequisicao.requisicao[indexDarBaixa].posologia);
+                    if (telaMedicamento.repositorioMedicamento.QuantidadeEhCritica(indexDarBaixa))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n         ATENÇÃO! Nível de estoque baixo!");
+                        Console.ResetColor();
+                    };
+                    repositorioRequisicao.DarBaixa(indexDarBaixa);
+                    repositorioRequisicao.Excluir(indexDarBaixa);
+                    RealizadoComSucesso("movimentado");
                 }
                 else
                 {
@@ -107,15 +160,6 @@
             Console.ResetColor();
             return Console.ReadLine().ToUpper();
         }
-        public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            opcao = RecebeString("\n Opção inválida. 'Enter' para tentar novamente ou 'S' para sair: ");
-
-            if (opcao == "S") sair = true;
-            else if (opcao != "") OpcaoInvalida(ref opcao, ref sair, ref repetir);
-        }
-        //Auxiliar Cadastro
         public int RecebeInt(string texto)
         {
             Console.Write(texto);
@@ -127,6 +171,29 @@
 
             return Convert.ToInt32(posologia);
         }
+        public DateTime RecebeData(string texto)
+        {
+            string data = RecebeString(" Informe a data: ");
+            char[] dataValidade = data.ToCharArray();
+            if (dataValidade.Length != 10 || dataValidade[2] != '/' || dataValidade[5] != '/') 
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n Data inválida! Tente novamente");
+                Console.ResetColor();
+
+                data = Convert.ToString(RecebeData(texto));
+            }
+            return Convert.ToDateTime(data);
+        }
+        public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            opcao = RecebeString("\n Opção inválida. 'Enter' para tentar novamente ou 'S' para sair: ");
+
+            if (opcao == "S") sair = true;
+            else if (opcao != "") OpcaoInvalida(ref opcao, ref sair, ref repetir);
+        }
+        //Auxiliar Cadastro
         public void NaoEhNumero(ref string quantidade, string texto)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -134,6 +201,38 @@
             Console.ResetColor();
 
             quantidade = Convert.ToString(RecebeInt(texto));//Para garantir que, ao sair do loop, o método "RecebeInt" não vai puxar a "quantidade" original (nula)
+        }
+        public void PacienteNaoCadastrado(ref bool sair)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\n     Este paciente ainda não foi cadastrado!");
+            Console.ResetColor();
+
+            string opcao = RecebeString("\n 1. Cadastrar paciente\n 2. Retornar\n S. Sair\n\n Digite: ");
+            bool repetir = false;
+            switch (opcao)
+            {
+                case "1": telaPaciente.CadastroPaciente(ref sair); break;
+                case "2": break;
+                case "S": sair = true; break;
+                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+            }
+        }
+        public void MedicamentoNaoCadastrado(ref bool sair)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\n     Este medicamento ainda não foi cadastrado!");
+            Console.ResetColor();
+
+            string opcao = RecebeString("\n 1. Cadastrar medicamento\n 2. Retornar\n S. Sair\n\n Digite: ");
+            bool repetir = false;
+            switch (opcao)
+            {
+                case "1": telaMedicamento.CadastroMedicamento(ref sair); break;
+                case "2": break;
+                case "S": sair = true; break;
+                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+            }
         }
         public void RealizadoComSucesso(string texto)
         {
@@ -169,16 +268,16 @@
         public void Visualizar(RepositorioRequisicao repositorioRequisicao)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\n------------------------------------------------------------\n Medicamento\t| Paciente\t| Posologia\t| Validade\n------------------------------------------------------------");
+            Console.WriteLine("\n--------------------------------------------------------------------\n ID\t| Medicamento\t| Paciente\t| Posologia\t| Validade\n--------------------------------------------------------------------");
             Console.ResetColor();
 
             for (int i = 0; i < repositorioRequisicao.requisicao.Length; i++)
             {
-                if (repositorioRequisicao.requisicao[i] != null) Console.Write($" {repositorioRequisicao.requisicao[i].medicamento}\t\t| {repositorioRequisicao.requisicao[i].paciente}\t\t| {repositorioRequisicao.requisicao[i].posologia}\t\t| {repositorioRequisicao.requisicao[i].dataValidade.ToString("d")}\n------------------------------------------------------------\n");
+                if (repositorioRequisicao.requisicao[i] != null) Console.Write($" {repositorioRequisicao.requisicao[i].id}\t| {repositorioRequisicao.requisicao[i].medicamento}\t\t| {repositorioRequisicao.requisicao[i].paciente}\t\t| {repositorioRequisicao.requisicao[i].posologia}\t\t| {repositorioRequisicao.requisicao[i].dataValidade.ToString("d")}\n--------------------------------------------------------------------\n");
             }
         }
         //Auxiliar Editar
-        public void NomeValidoParaEdicao(RepositorioRequisicao repositorioRequisicao, int indexEditar, ref bool sair, ref bool repetir)
+        public void IdValidoParaEdicao(RepositorioRequisicao repositorioRequisicao, int indexEditar, ref bool sair, ref bool repetir)
         {
             var objetoAuxiliar = repositorioRequisicao.requisicao[indexEditar];
 
@@ -212,10 +311,10 @@
         {
             Console.WriteLine("\t\t    Editar");
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\n------------------------------------------------------\n Nome\t| paciente\t| Posologia\t| Cartão SUS\n------------------------------------------------------");
+            Console.WriteLine("\n--------------------------------------------------------------\n ID\n| Nome\t| paciente\t| Posologia\t| Cartão SUS\n--------------------------------------------------------------");
             Console.ResetColor();
 
-            Console.Write($" {objetoAuxiliar.medicamento}\t| {objetoAuxiliar.paciente}\t\t| {objetoAuxiliar.posologia}\t\t| {objetoAuxiliar.dataValidade.ToString("d")}\n------------------------------------------------------\n\n");
+            Console.Write($"{objetoAuxiliar.id}\t| {objetoAuxiliar.medicamento}\t| {objetoAuxiliar.paciente}\t\t| {objetoAuxiliar.posologia}\t\t| {objetoAuxiliar.dataValidade.ToString("d")}\n--------------------------------------------------------------\n\n");
         }
     }
 }

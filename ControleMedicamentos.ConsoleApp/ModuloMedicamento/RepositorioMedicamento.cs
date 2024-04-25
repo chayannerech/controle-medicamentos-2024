@@ -24,6 +24,13 @@
         {
             medicamento[indexExcluir] = null;
         }
+        public void DarBaixa(int indexDarBaixa, string darBaixa, int quantidade)
+        {
+            for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) if (medicamento[i].nome == darBaixa)
+                    {
+                        medicamento[i].quantidade -= quantidade;
+                    }
+        }
 
         public void AtualizarQnt(int quantidade, int index)
         {

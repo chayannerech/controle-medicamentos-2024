@@ -11,10 +11,10 @@
             requisicao[contador] = new Requisicao(medicamento, paciente, posologia, dataValidade, contador + 1);
             contador++;
         }
-        public int PesquisarIndex(string pesquisar)
+        public int ValidarId(string id)
         {
             int index = -1;
-            for (int i = 0; i < requisicao.Length; i++) if (requisicao[i] != null) if (requisicao[i].id == Convert.ToInt32(pesquisar)) index = i;
+            for (int i = 0; i < requisicao.Length; i++) if (requisicao[i] != null) if (requisicao[i].id == Convert.ToInt32(id)) index = i;
             return index;
         }
         public void Editar(string medicamento, string paciente, int posologia, DateTime dataValidade, int indexEditar)
@@ -31,7 +31,7 @@
             contadorMovimentadas++;
         }
 
-        public bool NaoHaRequisicao()
+        public bool RepositorioVazio()
         {
             for (int i = 0; i < requisicao.Length; i++) if (requisicao[i] != null) return false;
             return true;

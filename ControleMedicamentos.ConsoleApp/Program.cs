@@ -21,7 +21,7 @@ namespace ControleMedicamentos.ConsoleApp
 
         static void Menu(ref bool sair, TelaCadastroMedicamento telaMedicamento, TelaCadastroPaciente telaPaciente, TelaCadastroRequisicao telaRequisicao)
         {
-            Cabecalho();
+            CabecalhoGeral();
 
             string opcao = RecebeString("\t    1. Gerir medicamentos\n\t     2. Gerir requisição\n\t      3. Gerir paciente\n\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
             switch (opcao)
@@ -33,8 +33,8 @@ namespace ControleMedicamentos.ConsoleApp
                 default: OpcaoInvalida(opcao, ref sair); break;
             }
         }
-
-        //Auxiliares
+        
+        #region Métodos Auxiliares
         static string RecebeString(string texto)
         {
             Console.Write(texto);
@@ -48,10 +48,11 @@ namespace ControleMedicamentos.ConsoleApp
             if (opcao == "S") sair = true;
             else if (opcao != "") OpcaoInvalida(opcao, ref sair);
         }
-        static void Cabecalho()
+        static void CabecalhoGeral()
         {
             Console.Clear();
             Console.WriteLine("------------------------------------------------\n  Controle de Medicamentos dos Postos de Saúde\n------------------------------------------------\n");
         }
+        #endregion
     }
 }

@@ -16,5 +16,6 @@
             this.quantidade = quantidade;
             this.quantidadeCritica = quantidadeCritica;
         }
+
     }
 }

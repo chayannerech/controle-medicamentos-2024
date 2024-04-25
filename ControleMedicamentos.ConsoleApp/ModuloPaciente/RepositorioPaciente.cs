@@ -10,10 +10,10 @@
             pacientes[contador] = new Paciente(nome, cpf, endereco, cartaoSUS);
             contador++;
         }
-        public int PesquisarIndex(string pesquisar)
+        public int EstePacienteExiste(string pesquisarNome)
         {
             int index = -1;
-            for (int i = 0; i < pacientes.Length; i++) if (pacientes[i] != null) if (pacientes[i].nome == pesquisar) index = i;
+            for (int i = 0; i < pacientes.Length; i++) if (pacientes[i] != null) if (pacientes[i].nome == pesquisarNome) index = i;
             return index;
         }
         public void Editar(string nome, string cpf, string endereco, string cartaoSUS, int indexEditar)
@@ -25,13 +25,7 @@
             pacientes[indexExcluir] = null;
         }
 
-        public int PacienteJaExiste(string nome)
-        {
-            int jaExiste = -1;
-            for (int i = 0; i < pacientes.Length; i++) if (pacientes[i] != null) if (pacientes[i].nome == nome) jaExiste = i;
-            return jaExiste;
-        }
-        public bool NaoHaPacientes()
+        public bool NaoExistemPacientes()
         {
             for (int i = 0; i < pacientes.Length; i++) if (pacientes[i] != null) return false;
             return true;

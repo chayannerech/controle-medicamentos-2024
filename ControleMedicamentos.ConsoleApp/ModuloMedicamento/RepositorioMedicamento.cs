@@ -10,7 +10,7 @@
             medicamento[contador] = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
             contador++;
         }
-        public int PesquisarIndex(string pesquisar)
+        public int EsteMedicamentoExiste(string pesquisar)
         {
             int index = -1;
             for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) if (medicamento[i].nome == pesquisar) index = i;
@@ -32,21 +32,12 @@
                     }
         }
 
-        public void AtualizarQnt(int quantidade, int index)
-        {
-            medicamento[index].quantidade = quantidade;
-        }
-        public int MedicamentoJaExiste(string nome)
-        {
-            int jaExiste = -1;
-            for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) if (medicamento[i].nome == nome) jaExiste = i;
-            return jaExiste;
-        }
         public bool EstoqueEstaVazio()
         {
             for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) return false;
             return true;
         }
-        public bool QuantidadeEhCritica(int i) => medicamento[i].quantidade <= medicamento[i].quantidadeCritica;
+        public void AtualizarQnt(int quantidade, int index) => medicamento[index].quantidade = quantidade;
+        public bool QuantidadeEstaCritica(int i) => medicamento[i].quantidade <= medicamento[i].quantidadeCritica;
     }
 }

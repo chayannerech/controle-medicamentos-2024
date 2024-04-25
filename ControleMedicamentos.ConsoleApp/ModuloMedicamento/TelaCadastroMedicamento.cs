@@ -16,7 +16,7 @@
                 string opcao = RecebeString("\n       1. Cadastrar um novo medicamento\n\t   2. Pesquisar medicamento\n\t     3. Visualizar estoque\n\t     4. Editar medicamento\n\t     5. Excluir medicamento\n\n\t R. Retornar ao menu principal\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
                 switch (opcao)
                 {
-                    case "1": CadastroMedicamento(ref sair); break;
+                    case "1": CadastroMedicamento(ref sair, ref repetir); break;
                     case "2": PesquisaMedicamento(ref sair, ref repetir); break;
                     case "3": VisualizarMedicamentos(ref sair, ref repetir); break;
                     case "4": EditarMedicamentos(ref sair, ref repetir); break;
@@ -28,14 +28,14 @@
             }
             while (repetir);
         }
-        public void CadastroMedicamento(ref bool sair)
+        public void CadastroMedicamento(ref bool sair, ref bool repetir)
         {
             CabecalhoMedicamentos();
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
-            int index = repositorioMedicamento.MedicamentoJaExiste(nome);
-            if (index != -1) MedicamentoJaExiste(repositorioMedicamento, index, ref sair);
+            int index = repositorioMedicamento.EsteMedicamentoExiste(nome);
+            if (index != -1) MedicamentoJaExiste(index, ref sair, ref repetir);
             else
             {
                 string descricao = RecebeString(" Informe a descrição: ");
@@ -46,17 +46,19 @@
                 RealizadoComSucesso("cadastrado");
             }
         }
-
         public void PesquisaMedicamento(ref bool sair, ref bool repetir)
         {
             CabecalhoMedicamentos();
-            string PesquisarIndex = RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do medicamento: ");
-            int index = repositorioMedicamento.PesquisarIndex(PesquisarIndex);
+            int index = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do medicamento: "));
 
-            if (index != -1) Pesquisa(repositorioMedicamento, index);
-            else MedicamentoNaoExiste();
-
-            ParaRetornarAoMenu(ref sair, ref repetir);
+            if (index == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+            else 
+            {
+                Console.WriteLine($"\n Medicamento = {repositorioMedicamento.medicamento[index].nome}\n Fornecedor = {repositorioMedicamento.medicamento[index].fornecedor}");
+                if (repositorioMedicamento.QuantidadeEstaCritica(index)) Notificação(ConsoleColor.Red, $" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}   Quantidade baixa!\n\n");
+                else Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}\n\n");
+                ParaRetornarAoMenu(ref sair, ref repetir);
+            }
         }
         public void VisualizarMedicamentos(ref bool sair, ref bool repetir)
         {
@@ -66,7 +68,7 @@
             if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
             else
             {
-                Visualizar(repositorioMedicamento);
+                Visualizar();
                 ParaRetornarAoMenu(ref sair, ref repetir);
             }
         }
@@ -78,15 +80,11 @@
             if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
             else
             {
-                Visualizar(repositorioMedicamento);
-                int indexEditar = repositorioMedicamento.PesquisarIndex(RecebeString("\n Informe o nome do medicamento a editar: "));
+                Visualizar();
+                int indexEditar = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\n Informe o nome do medicamento a editar: "));
 
-                if (indexEditar != -1) NomeValidoParaEdicao(repositorioMedicamento, indexEditar, ref sair, ref repetir);
-                else
-                {
-                    MedicamentoNaoExiste();
-                    ParaRetornarAoMenu(ref sair, ref repetir);
-                }
+                if (indexEditar == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+                else NomeValidoParaEdicao(indexEditar, ref sair, ref repetir);
             }
         }
         public void ExcluirMedicamentos(ref bool sair, ref bool repetir)
@@ -97,23 +95,16 @@
             if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
             else
             {
-                Visualizar(repositorioMedicamento);
-                int indexExcluir = repositorioMedicamento.PesquisarIndex(RecebeString("\n Informe o nome do medicamento a excluir: "));
+                Visualizar();
+                int indexExcluir = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\n Informe o nome do medicamento a excluir: "));
 
-                if (indexExcluir != -1)
-                {
-                    repositorioMedicamento.Excluir(indexExcluir);
-                    RealizadoComSucesso("excluido");
-                }
-                else
-                {
-                    MedicamentoNaoExiste();
-                    ParaRetornarAoMenu(ref sair, ref repetir);
-                }
+                if (indexExcluir == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+                else NomeValidoParaExclusao(indexExcluir);
             }
         }
 
-        //Auxiliar Menu
+        #region Métodos Auxiliares
+        #region Gerais
         public void CabecalhoMedicamentos()
         {
             Console.Clear();
@@ -123,70 +114,24 @@
         public string RecebeString(string texto)
         {
             Console.Write(texto);
-            Console.ResetColor();
             return Console.ReadLine().ToUpper();
         }
         public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            opcao = RecebeString("\n Opção inválida. 'Enter' para tentar novamente ou 'S' para sair: ");
-
-            if (opcao == "S") sair = true;
-            else if (opcao != "") OpcaoInvalida(ref opcao, ref sair, ref repetir);
+            Notificação(ConsoleColor.Red, "\n        Opção inválida. Tente novamente ");
+            Console.ReadLine();
+            repetir = true;
         }
-        //Auxiliar Cadastro
-        public int RecebeInt(string texto)
+        public void Notificação(ConsoleColor cor, string texto)
         {
+            Console.ForegroundColor = cor;
             Console.Write(texto);
-            char[] valorEmChar = Console.ReadLine().ToCharArray();
-            string quantidade = ""; //O intuito é testar caracter por caracter e depois concatenar numa string, pra converter pra int
-            
-            for (int i = 0; i < valorEmChar.Length; i++) if (Convert.ToInt32(valorEmChar[i]) >= 48 && Convert.ToInt32(valorEmChar[i]) <= 57) quantidade += valorEmChar[i];
-            if (quantidade.Length != valorEmChar.Length) NaoEhNumero(ref quantidade, texto);
-            
-            return Convert.ToInt32(quantidade);
-        }
-        public void NaoEhNumero(ref string quantidade, string texto)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\n Não é um número! Tente novamente");
             Console.ResetColor();
-
-            quantidade = Convert.ToString(RecebeInt(texto));//Para garantir que, ao sair do loop, o método "RecebeInt" não vai puxar a "quantidade" original (nula)
         }
         public void RealizadoComSucesso(string texto)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"\n      Medicamento {texto} com sucesso!");
-            Console.ResetColor();
-            string opcao = RecebeString("     'Enter' para voltar ao menu principal ");
-        }
-        public void MedicamentoJaExiste(RepositorioMedicamento repositorioMedicamento, int index, ref bool sair)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(" Este medicamento já existe!");
-            Console.ResetColor();
-            string opcao = RecebeString("\n 1. para retornar ao menu\n 2. para atualizar a quantidade\n S. para sair\n\n Digite: ");
-            bool repetir = false;
-            switch (opcao)
-            {
-                case "1": break;
-                case "2": repositorioMedicamento.AtualizarQnt(RecebeInt("\n Informe a nova quantidade: "), index); break;
-                case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
-            }
-        }
-        //Auxiliar Pesquisa
-        public void Pesquisa(RepositorioMedicamento repositorioMedicamento, int index)
-        {
-            Console.WriteLine($"\n Medicamento = {repositorioMedicamento.medicamento[index].nome}\n Fornecedor = {repositorioMedicamento.medicamento[index].fornecedor}");
-            if (repositorioMedicamento.QuantidadeEhCritica(index))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}   Quantidade baixa!\n\n");
-                Console.ResetColor();
-            }
-            else Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}\n\n");
+            Notificação(ConsoleColor.Green, $"\n\n       Requisição {texto} com sucesso!\n");
+            RecebeString("     'Enter' para voltar ao menu principal \n                       ");
         }
         public void ParaRetornarAoMenu(ref bool sair, ref bool repetir)
         {
@@ -196,65 +141,110 @@
             else if (opcao == "S") sair = true;
             else OpcaoInvalida(ref opcao, ref sair, ref repetir);
         }
-        public void MedicamentoNaoExiste()
+        #endregion
+
+        #region Cadastro
+        public int RecebeInt(string texto)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\n\n\t   Medicamento não existente!");
-            Console.ResetColor();
+            Console.Write(texto);
+            char[] valorEmChar = Console.ReadLine().ToCharArray();
+            string quantidade = ""; //O intuito é testar caracter por caracter e depois concatenar numa string, pra converter pra int
+
+            for (int i = 0; i < valorEmChar.Length; i++) if (Convert.ToInt32(valorEmChar[i]) >= 48 && Convert.ToInt32(valorEmChar[i]) <= 57) quantidade += valorEmChar[i];
+            if (quantidade.Length != valorEmChar.Length) NaoEhNumero(ref quantidade, texto);
+
+            return Convert.ToInt32(quantidade);
         }
-        //Auxiliar Visualizar
+        public void NaoEhNumero(ref string quantidade, string texto)
+        {
+            Notificação(ConsoleColor.Red, "\n Não é um número! Tente novamente\n");
+            quantidade = Convert.ToString(RecebeInt(texto));//Para garantir que, ao sair do loop, o método "RecebeInt" não vai puxar a "quantidade" original (nula)
+        }
+        public void MedicamentoJaExiste(int index, ref bool sair, ref bool repetir)
+        {
+            Notificação(ConsoleColor.Red, " Este medicamento já existe!\n");
+            string opcao = RecebeString("\n 1. para retornar ao menu\n 2. para atualizar a quantidade\n S. para sair\n\n Digite: ");
+            switch (opcao)
+            {
+                case "1": break;
+                case "2": repositorioMedicamento.AtualizarQnt(RecebeInt("\n Informe a nova quantidade: "), index); break;
+                case "S": sair = true; break;
+                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+            }
+        }
+        #endregion
+
+        #region Pesquisa
+        public void MedicamentoNaoCadastrado(ref bool sair, ref bool repetir)
+        {
+            Notificação(ConsoleColor.Red, "\n     Este medicamento ainda não foi cadastrado!\n");
+            string opcao = RecebeString("\n 1. Cadastrar medicamento\n R. Retornar\n S. Sair\n\n Digite: ");
+            switch (opcao)
+            {
+                case "1": CadastroMedicamento(ref sair, ref repetir); break;
+                case "R": repetir = true; break;
+                case "S": sair = true; break;
+                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+            }
+        }
+        #endregion
+
+        #region Visualizar
         public void EstoqueVazio(ref bool sair, ref bool repetir)
         {
             Console.WriteLine("------------------------------------------------\n");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("      Não existem medicamentos em estoque");
-            Console.ResetColor();
+            Notificação(ConsoleColor.Red, "      Não existem medicamentos em estoque\n");
             ParaRetornarAoMenu(ref sair, ref repetir);
         }
-        public void Visualizar(RepositorioMedicamento repositorioMedicamento)
+        public void CabecalhoVisualizar() => Notificação(ConsoleColor.Blue, "\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------\n");
+        public void Visualizar()
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------");
-            Console.ResetColor();
+            CabecalhoVisualizar();
 
-            for (int i = 0; i < repositorioMedicamento.medicamento.Length; i++)
-            {
-                if (repositorioMedicamento.medicamento[i] != null)
+            for (int i = 0; i < repositorioMedicamento.medicamento.Length; i++) if (repositorioMedicamento.medicamento[i] != null)
                 {
                     Console.Write($" {repositorioMedicamento.medicamento[i].nome}\t| {repositorioMedicamento.medicamento[i].descricao}\t\t| {repositorioMedicamento.medicamento[i].fornecedor}\t\t| ");
-                    if (repositorioMedicamento.QuantidadeEhCritica(i))
+                    if (repositorioMedicamento.QuantidadeEstaCritica(i))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write($"{repositorioMedicamento.medicamento[i].quantidade}\n");
-                        Console.ResetColor();
+                        Notificação(ConsoleColor.Red, $"{repositorioMedicamento.medicamento[i].quantidade}\n");
                         Console.Write("------------------------------------------------\n");
                     }
                     else Console.Write($"{repositorioMedicamento.medicamento[i].quantidade}\n------------------------------------------------\n");
                 }
-            }
         }
-        //Auxiliar Editar
-        public void NomeValidoParaEdicao(RepositorioMedicamento repositorioMedicamento, int indexEditar, ref bool sair, ref bool repetir)
+        #endregion
+
+        #region Edição
+        public void NomeValidoParaEdicao(int indexEditar, ref bool sair, ref bool repetir)
         {
             var objetoAuxiliar = repositorioMedicamento.medicamento[indexEditar];
 
-            MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar);
+            MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, out bool editado);
             if (!sair && !repetir)
             {
                 repositorioMedicamento.Editar(objetoAuxiliar.nome, objetoAuxiliar.descricao, objetoAuxiliar.fornecedor, objetoAuxiliar.quantidade, objetoAuxiliar.quantidadeCritica, indexEditar);
-                RealizadoComSucesso("editado");
+                if (editado) RealizadoComSucesso("editado");
             }
         }
-        public void MenuParaEdicao(ref bool sair, ref bool repetir, Medicamento objetoAuxiliar)
+        public void MenuParaEdicao(ref bool sair, ref bool repetir, Medicamento objetoAuxiliar, out bool editado)
         {
             Console.Clear();
             CabecalhoMedicamentos();
             VisualizarParaEdicao(objetoAuxiliar);
-
+            editado = true;
             string opcao = RecebeString(" Ótimo! O que deseja Editar?\n 1. nome\n 2. descricao\n 3. fornecedor\n 4. quantidade em estoque\n 5. quantidade mínima \n\n R. para retornar\n S. para sair\n\n Digite: ");
             switch (opcao)
             {
-                case "1": objetoAuxiliar.nome = RecebeString("\n Informe o novo nome: "); break;
+                case "1":
+                    string nome = RecebeString("\n Informe o novo nome: ");
+                    int index = repositorioMedicamento.EsteMedicamentoExiste(nome);
+                    if (index == -1) objetoAuxiliar.nome = nome;
+                    else
+                    {
+                        MedicamentoJaExiste(index, ref sair, ref repetir);
+                        editado = false;
+                    }
+                    break;
                 case "2": objetoAuxiliar.descricao = RecebeString("\n Informe a nova descrição: "); break;
                 case "3": objetoAuxiliar.fornecedor = RecebeString("\n Informe o novo fornecedor: "); break;
                 case "4": objetoAuxiliar.quantidade = RecebeInt("\n Informe a nova quantidade: "); break;
@@ -264,25 +254,25 @@
                 default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
             }
             if (opcao == "") repetir = true;
-        }        
+        }
         public void VisualizarParaEdicao(Medicamento objetoAuxiliar)
         {
             Console.WriteLine("\t\t    Editar");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------");
-            Console.ResetColor();
+            CabecalhoVisualizar();
 
             Console.Write($" {objetoAuxiliar.nome}\t| {objetoAuxiliar.descricao}\t\t| {objetoAuxiliar.fornecedor}\t\t| ");
-            if (objetoAuxiliar.quantidade <= objetoAuxiliar.quantidadeCritica)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write($"{objetoAuxiliar.quantidade}\n");
-                Console.ResetColor();
-                Console.Write("------------------------------------------------\n");
-            }
-            else Console.Write($"{objetoAuxiliar.quantidade}\n------------------------------------------------\n");
-
-            Console.WriteLine();
+            if (objetoAuxiliar.quantidade <= objetoAuxiliar.quantidadeCritica) Notificação(ConsoleColor.Red, $"{objetoAuxiliar.quantidade}\n------------------------------------------------\n\n");
+            else Console.Write($"{objetoAuxiliar.quantidade}\n------------------------------------------------\n\n");
         }
+        #endregion
+
+        #region Exclusão
+        public void NomeValidoParaExclusao(int indexExcluir)
+        {
+            repositorioMedicamento.Excluir(indexExcluir);
+            RealizadoComSucesso("excluido");
+        }
+        #endregion
+        #endregion
     }
 }

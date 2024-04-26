@@ -56,8 +56,9 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
                 {
                     int posologia = RecebeInt(" Informe a posologia: ");
                     DateTime dataValidade = RecebeData(" Informe a data de validade: ");
+                    var novaRequisicao = new Requisicao(medicamento, paciente, posologia, dataValidade, repositorioRequisicao.contador + 1);
 
-                    repositorioRequisicao.Cadastrar(medicamento, paciente, posologia, dataValidade);
+                    repositorioRequisicao.Cadastrar(novaRequisicao);
                     RealizadoComSucesso("cadastrada");
                 }
             }
@@ -86,7 +87,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
                 int indexEditar = repositorioRequisicao.EsteItemExiste(RecebeString("\n Informe o ID que deseja editar: "));
 
                 if (indexEditar == -1) IdNaoValido(ref sair, ref repetir);
-                else IdValidoParaEdicao(repositorioRequisicao, indexEditar, ref sair, ref repetir);
+                else IdValidoParaEdicao(indexEditar, ref sair, ref repetir);
             }
         }
         public void ExcluirRequisicao(ref bool sair, ref bool repetir)
@@ -101,7 +102,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
                 int indexExcluir = repositorioRequisicao.EsteItemExiste(RecebeString("\n Informe o ID que deseja excluir: "));
 
                 if (indexExcluir == -1) IdNaoValido(ref sair, ref repetir);
-                else IdValidoParaExclusao(repositorioRequisicao, indexExcluir);
+                else IdValidoParaExclusao(indexExcluir);
             }
         }
         public void DarBaixaRequisicao(ref bool sair, ref bool repetir)
@@ -113,10 +114,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             else
             {
                 Visualizar();
-                int indexDarBaixa = repositorioRequisicao.EsteIdExiste(RecebeString("\n Informe o ID que deseja dar baixa: "));
+                int indexDarBaixa = repositorioRequisicao.EsteItemExiste(RecebeString("\n Informe o ID que deseja dar baixa: "));
 
                 if (indexDarBaixa == -1) IdNaoValido(ref sair, ref repetir);
-                else IdValidoParaMovimentacao(telaMedicamento, indexDarBaixa, repositorioRequisicao);
+                else IdValidoParaMovimentacao(indexDarBaixa);
             }
         }
 
@@ -247,14 +248,15 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
         #endregion
 
         #region Edição
-        public void IdValidoParaEdicao(RepositorioRequisicao repositorioRequisicao, int indexEditar, ref bool sair, ref bool repetir)
+        public void IdValidoParaEdicao(int indexEditar, ref bool sair, ref bool repetir)
         {
             var objetoAuxiliar = repositorioRequisicao.entidade[indexEditar];
             MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, telaMedicamento, telaPaciente);
 
             if (!sair && !repetir)
             {
-                repositorioRequisicao.Editar(objetoAuxiliar.medicamento, objetoAuxiliar.paciente, objetoAuxiliar.posologia, objetoAuxiliar.dataValidade, indexEditar);
+                var editarRequisicao = new Requisicao(objetoAuxiliar.medicamento, objetoAuxiliar.paciente, objetoAuxiliar.posologia, objetoAuxiliar.dataValidade, 2);
+                repositorioRequisicao.Editar(editarRequisicao, indexEditar);
                 RealizadoComSucesso("editada");
             }
         }
@@ -268,7 +270,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             CabecalhoRequisicao();
             VisualizarParaEdicao(objetoAuxiliar);
 
-            string opcao = RecebeString(" Ótimo! O que deseja Editar?\n 1. medicamento\n 2. paciente\n 3. endereço\n 4. cartão SUS\n\n R. para retornar\n S. para sair\n\n Digite: ");
+            string opcao = RecebeString(" Ótimo! O que deseja Editar?\n 1. medicamento\n 2. paciente\n 3. posologia\n 4. data de validade\n\n R. para retornar\n S. para sair\n\n Digite: ");
             switch (opcao)
             {
                 case "1": 
@@ -282,7 +284,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
                     if (jaExiste == -1) PacienteNaoCadastrado(ref sair, ref repetir); 
                     break;
                 case "3": objetoAuxiliar.posologia = RecebeInt("\n Informe o novo endereço: "); break;
-                case "4": objetoAuxiliar.dataValidade = Convert.ToDateTime(RecebeString("\n Informe o novo cartão SUS: ")); break;
+                case "4": objetoAuxiliar.dataValidade = RecebeData("\n Informe o novo cartão SUS: "); break;
                 case "R": repetir = true; break;
                 case "S": sair = true; break;
                 default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
@@ -300,7 +302,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
         #endregion
 
         #region Exclusão
-        public void IdValidoParaExclusao(RepositorioRequisicao repositorioRequisicao, int indexExcluir)
+        public void IdValidoParaExclusao(int indexExcluir)
         {
             repositorioRequisicao.Excluir(indexExcluir);
             RealizadoComSucesso("excluido");
@@ -308,14 +310,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
         #endregion
 
         #region DarBaixa
-        public void IdValidoParaMovimentacao(TelaCadastroMedicamento telaMedicamento, int indexDarBaixa, RepositorioRequisicao repositorioRequisicao)
+        public void IdValidoParaMovimentacao(int indexDarBaixa)
         {
-            telaMedicamento.repositorioMedicamento.DarBaixa(indexDarBaixa, repositorioRequisicao.entidade[indexDarBaixa].medicamento, repositorioRequisicao.entidade[indexDarBaixa].posologia);
-            
+            repositorioRequisicao.DarBaixa(telaMedicamento.repositorioMedicamento.entidade, indexDarBaixa);
             if (telaMedicamento.repositorioMedicamento.QuantidadeEstaCritica(indexDarBaixa)) Notificação(ConsoleColor.Red, "\n         ATENÇÃO! Nível de estoque baixo!\n");
-            
-            repositorioRequisicao.DarBaixa(indexDarBaixa);
-            repositorioRequisicao.Excluir(indexDarBaixa);
             RealizadoComSucesso("movimentada");
         }
         #endregion

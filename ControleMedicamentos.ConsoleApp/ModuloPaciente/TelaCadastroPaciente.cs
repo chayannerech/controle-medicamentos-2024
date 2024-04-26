@@ -44,7 +44,9 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
                 string cpf = RecebeString(" Informe o cpf: ");
                 string endereco = RecebeString(" Informe o endereço: ");
                 string cartaoSUS = RecebeString(" Informe o cartão SUS: ");
-                repositorioPaciente.Cadastrar(nome, cpf, endereco, cartaoSUS);
+                var novoPaciente = new Paciente(nome, cpf, endereco, cartaoSUS);
+
+                repositorioPaciente.Cadastrar(novoPaciente);
                 RealizadoComSucesso("cadastrado");
             }
         }
@@ -195,7 +197,8 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
 
             if (!sair && !repetir)
             {
-                repositorioPaciente.Editar(objetoAuxiliar.nome, objetoAuxiliar.cpf, objetoAuxiliar.endereco, objetoAuxiliar.cartaoSUS, indexEditar);
+                var editarPaciente = new Paciente(objetoAuxiliar.nome, objetoAuxiliar.cpf, objetoAuxiliar.endereco, objetoAuxiliar.cartaoSUS);
+                repositorioPaciente.Editar(editarPaciente, indexEditar);
                 if (editado) RealizadoComSucesso("editado");
             }
         }

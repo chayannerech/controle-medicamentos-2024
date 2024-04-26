@@ -44,7 +44,9 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
                 string fornecedor = RecebeString(" Informe o fornecedor: ");
                 int quantidade = RecebeInt(" Informe a quantidade em estoque: ");
                 int quantidadeCritica = RecebeInt(" Informe a quantidade mínima para este medicamento: ");
-                repositorioMedicamento.Cadastrar(nome, descricao, fornecedor, quantidade, quantidadeCritica);
+                var novoMedicamento = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
+
+                repositorioMedicamento.Cadastrar(novoMedicamento);
                 RealizadoComSucesso("cadastrado");
             }
         }
@@ -224,7 +226,8 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
             MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, out bool editado);
             if (!sair && !repetir)
             {
-                repositorioMedicamento.Editar(objetoAuxiliar.nome, objetoAuxiliar.descricao, objetoAuxiliar.fornecedor, objetoAuxiliar.quantidade, objetoAuxiliar.quantidadeCritica, indexEditar);
+                var editarMedicamento = new Medicamento(objetoAuxiliar.nome, objetoAuxiliar.descricao, objetoAuxiliar.fornecedor, objetoAuxiliar.quantidade, objetoAuxiliar.quantidadeCritica);
+                repositorioMedicamento.Editar(editarMedicamento, indexEditar);
                 if (editado) RealizadoComSucesso("editado");
             }
         }

@@ -1,43 +1,20 @@
-﻿namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
 {
-    internal class RepositorioMedicamento
+    internal class RepositorioMedicamento : Repositorio
     {
-        public Medicamento[] medicamento = new Medicamento[50];
-        public int contador = 0, qntCritica;
-
         public void Cadastrar(string nome, string descricao, string fornecedor, int quantidade, int quantidadeCritica)
         {
-            medicamento[contador] = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
+            entidade[contador] = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
             contador++;
-        }
-        public int EsteMedicamentoExiste(string pesquisar)
-        {
-            int index = -1;
-            for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) if (medicamento[i].nome == pesquisar) index = i;
-            return index;
         }
         public void Editar(string nome, string descricao, string fornecedor, int quantidade, int quantidadeCritica, int indexEditar)
         {
-            medicamento[indexEditar] = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
-        }
-        public void Excluir(int indexExcluir)
-        {
-            medicamento[indexExcluir] = null;
+            entidade[indexEditar] = new Medicamento(nome, descricao, fornecedor, quantidade, quantidadeCritica);
         }
         public void DarBaixa(int indexDarBaixa, string darBaixa, int quantidade)
         {
-            for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) if (medicamento[i].nome == darBaixa)
-                    {
-                        medicamento[i].quantidade -= quantidade;
-                    }
+            for (int i = 0; i < entidade.Length; i++) if (entidade[i] != null) if (entidade[i].nome == darBaixa) entidade[i].quantidade -= quantidade;
         }
-
-        public bool EstoqueEstaVazio()
-        {
-            for (int i = 0; i < medicamento.Length; i++) if (medicamento[i] != null) return false;
-            return true;
-        }
-        public void AtualizarQnt(int quantidade, int index) => medicamento[index].quantidade = quantidade;
-        public bool QuantidadeEstaCritica(int i) => medicamento[i].quantidade <= medicamento[i].quantidadeCritica;
     }
 }

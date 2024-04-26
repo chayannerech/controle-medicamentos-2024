@@ -1,13 +1,8 @@
-﻿namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
 {
-    internal class Medicamento
+    internal class Medicamento : Entidades
     {
-        public string nome { get; set; }
-        public string descricao { get; set; } 
-        public string fornecedor { get; set; }
-        public int quantidade { get; set; }
-        public int quantidadeCritica { get; set; }
-
         public Medicamento(string nome, string descricao, string fornecedor, int quantidade, int quantidadeCritica) 
         { 
             this.nome = nome;

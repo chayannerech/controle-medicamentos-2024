@@ -1,40 +1,24 @@
-﻿namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
 {
-    internal class RepositorioRequisicao
+    internal class RepositorioRequisicao : Repositorio
     {
-        public Requisicao[] requisicao = new Requisicao[50];
-        public Requisicao[] requisicoesMovimentadas = new Requisicao[50];
-        public int contador = 0, contadorMovimentadas = 0;
-
         public void Cadastrar(string medicamento, string paciente, int posologia, DateTime dataValidade)
         {
-            requisicao[contador] = new Requisicao(medicamento, paciente, posologia, dataValidade, contador + 1);
+            entidade[contador] = new Requisicao(medicamento, paciente, posologia, dataValidade, contador + 1);
             contador++;
         }
-        public int ValidarId(string id)
-        {
-            int index = -1;
-            for (int i = 0; i < requisicao.Length; i++) if (requisicao[i] != null) if (requisicao[i].id == Convert.ToInt32(id)) index = i;
-            return index;
-        }
-        public void Editar(string medicamento, string paciente, int posologia, DateTime dataValidade, int indexEditar)
-        {
-            requisicao[indexEditar] = new Requisicao(medicamento, paciente, posologia, dataValidade, 2);
-        }
-        public void Excluir(int indexExcluir)
-        {
-            requisicao[indexExcluir] = null;
-        }
+        public void Editar(string medicamento, string paciente, int posologia, DateTime dataValidade, int indexEditar) => entidade[indexEditar] = new Requisicao(medicamento, paciente, posologia, dataValidade, 2);
         public void DarBaixa(int indexDarBaixa)
         {
-            requisicoesMovimentadas[contadorMovimentadas] = requisicao[indexDarBaixa];
+            entidadesMovimentadas[contadorMovimentadas] = entidade[indexDarBaixa];
             contadorMovimentadas++;
         }
-
-        public bool RepositorioVazio()
+        public int EsteIdExiste(string pesquisar)
         {
-            for (int i = 0; i < requisicao.Length; i++) if (requisicao[i] != null) return false;
-            return true;
+            int index = -1;
+            for (int i = 0; i < entidade.Length; i++) if (entidade[i] != null) if (entidade[i].id == Convert.ToInt32(pesquisar)) index = i;
+            return index;
         }
     }
 }

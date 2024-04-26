@@ -1,4 +1,5 @@
-﻿using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
 using ControleMedicamentos.ConsoleApp.ModuloPaciente;
 using Controlepacientes.ConsoleApp.ModuloPaciente;
 namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
@@ -44,12 +45,12 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string paciente = RecebeString(" Informe o nome do paciente: ");
-            int jaExiste = telaPaciente.repositorioPaciente.EstePacienteExiste(paciente);
+            int jaExiste = telaPaciente.repositorioPaciente.EsteItemExiste(paciente);
             if (jaExiste == -1) PacienteNaoCadastrado(ref sair, ref repetir);
             else
             {
                 string medicamento = RecebeString(" Informe o medicamento: ");
-                jaExiste = telaMedicamento.repositorioMedicamento.EsteMedicamentoExiste(medicamento);
+                jaExiste = telaMedicamento.repositorioMedicamento.EsteItemExiste(medicamento);
                 if (jaExiste == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
                 else
                 {
@@ -66,10 +67,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             CabecalhoRequisicao();
             Console.WriteLine("\t\t  Visualizar");
 
-            if (repositorioRequisicao.RepositorioVazio()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
+            if (repositorioRequisicao.NaoExistemItens()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
             else
             {
-                ListarRequisicoes(repositorioRequisicao);
+                Visualizar();
                 ParaRetornarAoMenu(ref sair, ref repetir);
             }
         }
@@ -78,11 +79,11 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             CabecalhoRequisicao();
             Console.WriteLine("\t\t    Editar");
 
-            if (repositorioRequisicao.RepositorioVazio()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
+            if (repositorioRequisicao.NaoExistemItens()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
             else
             {
-                ListarRequisicoes(repositorioRequisicao);
-                int indexEditar = repositorioRequisicao.ValidarId(RecebeString("\n Informe o ID que deseja editar: "));
+                Visualizar();
+                int indexEditar = repositorioRequisicao.EsteItemExiste(RecebeString("\n Informe o ID que deseja editar: "));
 
                 if (indexEditar == -1) IdNaoValido(ref sair, ref repetir);
                 else IdValidoParaEdicao(repositorioRequisicao, indexEditar, ref sair, ref repetir);
@@ -93,11 +94,11 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             CabecalhoRequisicao();
             Console.WriteLine("\t\t    Excluir");
 
-            if (repositorioRequisicao.RepositorioVazio()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
+            if (repositorioRequisicao.NaoExistemItens()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
             else
             {
-                ListarRequisicoes(repositorioRequisicao);
-                int indexExcluir = repositorioRequisicao.ValidarId(RecebeString("\n Informe o ID que deseja excluir: "));
+                Visualizar();
+                int indexExcluir = repositorioRequisicao.EsteItemExiste(RecebeString("\n Informe o ID que deseja excluir: "));
 
                 if (indexExcluir == -1) IdNaoValido(ref sair, ref repetir);
                 else IdValidoParaExclusao(repositorioRequisicao, indexExcluir);
@@ -108,11 +109,11 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             CabecalhoRequisicao();
             Console.WriteLine("\t\t   Dar Baixa");
 
-            if (repositorioRequisicao.RepositorioVazio()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
+            if (repositorioRequisicao.NaoExistemItens()) AindaNaoExistemRequisicoes(ref sair, ref repetir);
             else
             {
-                ListarRequisicoes(repositorioRequisicao);
-                int indexDarBaixa = repositorioRequisicao.ValidarId(RecebeString("\n Informe o ID que deseja dar baixa: "));
+                Visualizar();
+                int indexDarBaixa = repositorioRequisicao.EsteIdExiste(RecebeString("\n Informe o ID que deseja dar baixa: "));
 
                 if (indexDarBaixa == -1) IdNaoValido(ref sair, ref repetir);
                 else IdValidoParaMovimentacao(telaMedicamento, indexDarBaixa, repositorioRequisicao);
@@ -234,12 +235,12 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             ParaRetornarAoMenu(ref sair, ref repetir);
         }
         public void CabecalhoVisualizacao() => Notificação(ConsoleColor.Blue, "\n--------------------------------------------------------------------\n ID\t| Medicamento\t| Paciente\t| Posologia\t| Validade\n--------------------------------------------------------------------\n");
-        public void ListarRequisicoes(RepositorioRequisicao repositorioRequisicao)
+        public void Visualizar()
         {
             CabecalhoVisualizacao();
-            for (int i = 0; i < repositorioRequisicao.requisicao.Length; i++) if (repositorioRequisicao.requisicao[i] != null)
+            for (int i = 0; i < repositorioRequisicao.entidade.Length; i++) if (repositorioRequisicao.entidade[i] != null)
                 {
-                    Console.Write($" {repositorioRequisicao.requisicao[i].id}\t| {repositorioRequisicao.requisicao[i].medicamento}\t\t| {repositorioRequisicao.requisicao[i].paciente}\t\t| {repositorioRequisicao.requisicao[i].posologia}\t\t| {repositorioRequisicao.requisicao[i].dataValidade.ToString("d")}" +
+                    Console.Write($" {repositorioRequisicao.entidade[i].id}\t| {repositorioRequisicao.entidade[i].medicamento}\t\t| {repositorioRequisicao.entidade[i].paciente}\t\t| {repositorioRequisicao.entidade[i].posologia}\t\t| {repositorioRequisicao.entidade[i].dataValidade.ToString("d")}" +
                                   $"\n--------------------------------------------------------------------\n");
                 }
         }
@@ -248,7 +249,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
         #region Edição
         public void IdValidoParaEdicao(RepositorioRequisicao repositorioRequisicao, int indexEditar, ref bool sair, ref bool repetir)
         {
-            var objetoAuxiliar = repositorioRequisicao.requisicao[indexEditar];
+            var objetoAuxiliar = repositorioRequisicao.entidade[indexEditar];
             MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, telaMedicamento, telaPaciente);
 
             if (!sair && !repetir)
@@ -262,7 +263,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             Notificação(ConsoleColor.Red, "\n\n\t   Requisição não existente!\n");
             ParaRetornarAoMenu(ref sair, ref repetir);
         }
-        public void MenuParaEdicao(ref bool sair, ref bool repetir, Requisicao objetoAuxiliar, TelaCadastroMedicamento telaMedicamento, TelaCadastroPaciente telaPaciente)
+        public void MenuParaEdicao(ref bool sair, ref bool repetir, Entidades objetoAuxiliar, TelaCadastroMedicamento telaMedicamento, TelaCadastroPaciente telaPaciente)
         {
             CabecalhoRequisicao();
             VisualizarParaEdicao(objetoAuxiliar);
@@ -272,12 +273,12 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             {
                 case "1": 
                     objetoAuxiliar.medicamento = RecebeString(" Informe o novo medicamento: ");
-                    int jaExiste = telaMedicamento.repositorioMedicamento.EsteMedicamentoExiste(objetoAuxiliar.medicamento);
+                    int jaExiste = telaMedicamento.repositorioMedicamento.EsteItemExiste(objetoAuxiliar.medicamento);
                     if (jaExiste == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
                     break;
                 case "2": 
                     objetoAuxiliar.paciente = RecebeString(" Informe o novo paciente: ");
-                    jaExiste = telaPaciente.repositorioPaciente.EstePacienteExiste(objetoAuxiliar.paciente);
+                    jaExiste = telaPaciente.repositorioPaciente.EsteItemExiste(objetoAuxiliar.paciente);
                     if (jaExiste == -1) PacienteNaoCadastrado(ref sair, ref repetir); 
                     break;
                 case "3": objetoAuxiliar.posologia = RecebeInt("\n Informe o novo endereço: "); break;
@@ -288,7 +289,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
             }
             if (opcao == "") repetir = true;
         }
-        public void VisualizarParaEdicao(Requisicao objetoAuxiliar)
+        public void VisualizarParaEdicao(Entidades objetoAuxiliar)
         {
             Console.WriteLine("\t\t    Editar");
             CabecalhoVisualizacao();
@@ -309,8 +310,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
         #region DarBaixa
         public void IdValidoParaMovimentacao(TelaCadastroMedicamento telaMedicamento, int indexDarBaixa, RepositorioRequisicao repositorioRequisicao)
         {
-            telaMedicamento.repositorioMedicamento.DarBaixa(indexDarBaixa, repositorioRequisicao.requisicao[indexDarBaixa].medicamento, repositorioRequisicao.requisicao[indexDarBaixa].posologia);
+            telaMedicamento.repositorioMedicamento.DarBaixa(indexDarBaixa, repositorioRequisicao.entidade[indexDarBaixa].medicamento, repositorioRequisicao.entidade[indexDarBaixa].posologia);
+            
             if (telaMedicamento.repositorioMedicamento.QuantidadeEstaCritica(indexDarBaixa)) Notificação(ConsoleColor.Red, "\n         ATENÇÃO! Nível de estoque baixo!\n");
+            
             repositorioRequisicao.DarBaixa(indexDarBaixa);
             repositorioRequisicao.Excluir(indexDarBaixa);
             RealizadoComSucesso("movimentada");

@@ -1,4 +1,6 @@
-﻿namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+
+namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
 {
     internal class TelaCadastroMedicamento
     {
@@ -34,7 +36,7 @@
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
-            int index = repositorioMedicamento.EsteMedicamentoExiste(nome);
+            int index = repositorioMedicamento.EsteItemExiste(nome);
             if (index != -1) MedicamentoJaExiste(index, ref sair, ref repetir);
             else
             {
@@ -49,14 +51,14 @@
         public void PesquisaMedicamento(ref bool sair, ref bool repetir)
         {
             CabecalhoMedicamentos();
-            int index = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do medicamento: "));
+            int index = repositorioMedicamento.EsteItemExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do medicamento: "));
 
             if (index == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
             else 
             {
-                Console.WriteLine($"\n Medicamento = {repositorioMedicamento.medicamento[index].nome}\n Fornecedor = {repositorioMedicamento.medicamento[index].fornecedor}");
-                if (repositorioMedicamento.QuantidadeEstaCritica(index)) Notificação(ConsoleColor.Red, $" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}   Quantidade baixa!\n\n");
-                else Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.medicamento[index].quantidade}\n\n");
+                Console.WriteLine($"\n Medicamento = {repositorioMedicamento.entidade[index].nome}\n Fornecedor = {repositorioMedicamento.entidade[index].fornecedor}");
+                if (repositorioMedicamento.QuantidadeEstaCritica(index)) Notificação(ConsoleColor.Red, $" Quantidade em estoque = {repositorioMedicamento.entidade[index].quantidade}   Quantidade baixa!\n\n");
+                else Console.WriteLine($" Quantidade em estoque = {repositorioMedicamento.entidade[index].quantidade}\n\n");
                 ParaRetornarAoMenu(ref sair, ref repetir);
             }
         }
@@ -65,7 +67,7 @@
             CabecalhoMedicamentos();
             Console.WriteLine("\t\t  Visualizar");
 
-            if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
             else
             {
                 Visualizar();
@@ -77,11 +79,11 @@
             CabecalhoMedicamentos();
             Console.WriteLine("\t\t    Editar");
 
-            if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
             else
             {
                 Visualizar();
-                int indexEditar = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\n Informe o nome do medicamento a editar: "));
+                int indexEditar = repositorioMedicamento.EsteItemExiste(RecebeString("\n Informe o nome do medicamento a editar: "));
 
                 if (indexEditar == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
                 else NomeValidoParaEdicao(indexEditar, ref sair, ref repetir);
@@ -92,11 +94,11 @@
             CabecalhoMedicamentos();
             Console.WriteLine("\t\t    Excluir");
 
-            if (repositorioMedicamento.EstoqueEstaVazio()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
             else
             {
                 Visualizar();
-                int indexExcluir = repositorioMedicamento.EsteMedicamentoExiste(RecebeString("\n Informe o nome do medicamento a excluir: "));
+                int indexExcluir = repositorioMedicamento.EsteItemExiste(RecebeString("\n Informe o nome do medicamento a excluir: "));
 
                 if (indexExcluir == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
                 else NomeValidoParaExclusao(indexExcluir);
@@ -201,15 +203,15 @@
         {
             CabecalhoVisualizar();
 
-            for (int i = 0; i < repositorioMedicamento.medicamento.Length; i++) if (repositorioMedicamento.medicamento[i] != null)
+            for (int i = 0; i < repositorioMedicamento.entidade.Length; i++) if (repositorioMedicamento.entidade[i] != null)
                 {
-                    Console.Write($" {repositorioMedicamento.medicamento[i].nome}\t| {repositorioMedicamento.medicamento[i].descricao}\t\t| {repositorioMedicamento.medicamento[i].fornecedor}\t\t| ");
+                    Console.Write($" {repositorioMedicamento.entidade[i].nome}\t| {repositorioMedicamento.entidade[i].descricao}\t\t| {repositorioMedicamento.entidade[i].fornecedor}\t\t| ");
                     if (repositorioMedicamento.QuantidadeEstaCritica(i))
                     {
-                        Notificação(ConsoleColor.Red, $"{repositorioMedicamento.medicamento[i].quantidade}\n");
+                        Notificação(ConsoleColor.Red, $"{repositorioMedicamento.entidade[i].quantidade}\n");
                         Console.Write("------------------------------------------------\n");
                     }
-                    else Console.Write($"{repositorioMedicamento.medicamento[i].quantidade}\n------------------------------------------------\n");
+                    else Console.Write($"{repositorioMedicamento.entidade[i].quantidade}\n------------------------------------------------\n");
                 }
         }
         #endregion
@@ -217,7 +219,7 @@
         #region Edição
         public void NomeValidoParaEdicao(int indexEditar, ref bool sair, ref bool repetir)
         {
-            var objetoAuxiliar = repositorioMedicamento.medicamento[indexEditar];
+            var objetoAuxiliar = repositorioMedicamento.entidade[indexEditar];
 
             MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, out bool editado);
             if (!sair && !repetir)
@@ -226,7 +228,7 @@
                 if (editado) RealizadoComSucesso("editado");
             }
         }
-        public void MenuParaEdicao(ref bool sair, ref bool repetir, Medicamento objetoAuxiliar, out bool editado)
+        public void MenuParaEdicao(ref bool sair, ref bool repetir, Entidades objetoAuxiliar, out bool editado)
         {
             Console.Clear();
             CabecalhoMedicamentos();
@@ -237,7 +239,7 @@
             {
                 case "1":
                     string nome = RecebeString("\n Informe o novo nome: ");
-                    int index = repositorioMedicamento.EsteMedicamentoExiste(nome);
+                    int index = repositorioMedicamento.EsteItemExiste(nome);
                     if (index == -1) objetoAuxiliar.nome = nome;
                     else
                     {
@@ -255,7 +257,7 @@
             }
             if (opcao == "") repetir = true;
         }
-        public void VisualizarParaEdicao(Medicamento objetoAuxiliar)
+        public void VisualizarParaEdicao(Entidades objetoAuxiliar)
         {
             Console.WriteLine("\t\t    Editar");
             CabecalhoVisualizar();

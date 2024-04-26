@@ -1,4 +1,5 @@
-﻿using ControleMedicamentos.ConsoleApp.ModuloPaciente;
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+using ControleMedicamentos.ConsoleApp.ModuloPaciente;
 
 namespace Controlepacientes.ConsoleApp.ModuloPaciente
 {
@@ -36,7 +37,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
-            int index = repositorioPaciente.EstePacienteExiste(nome);
+            int index = repositorioPaciente.EsteItemExiste(nome);
             if (index != -1) PacienteJaExiste(ref sair, ref repetir);
             else
             {
@@ -50,12 +51,12 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         public void PesquisaPaciente(ref bool sair, ref bool repetir)
         {
             CabecalhoPaciente();
-            int index = repositorioPaciente.EstePacienteExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do paciente: "));
+            int index = repositorioPaciente.EsteItemExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do paciente: "));
 
             if (index == -1) PacienteNaoCadastrado(ref sair, ref repetir);
             else
             {
-                Console.WriteLine($"\n paciente = {repositorioPaciente.pacientes[index].nome}\n CPF = {repositorioPaciente.pacientes[index].cpf}\n Endereço = {repositorioPaciente.pacientes[index].endereco}\n Cartão SUS = {repositorioPaciente.pacientes[index].cartaoSUS}\n");
+                Console.WriteLine($"\n paciente = {repositorioPaciente.entidade[index].nome}\n CPF = {repositorioPaciente.entidade[index].cpf}\n Endereço = {repositorioPaciente.entidade[index].endereco}\n Cartão SUS = {repositorioPaciente.entidade[index].cartaoSUS}\n");
                 ParaRetornarAoMenu(ref sair, ref repetir);
             }
         }
@@ -64,7 +65,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             CabecalhoPaciente();
             Console.WriteLine("\t\t  Visualizar");
 
-            if (repositorioPaciente.NaoExistemPacientes()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
             else
             {
                 Visualizar();
@@ -76,11 +77,11 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             CabecalhoPaciente();
             Console.WriteLine("\t\t    Editar");
 
-            if (repositorioPaciente.NaoExistemPacientes()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
             else
             {
                 Visualizar();
-                int indexEditar = repositorioPaciente.EstePacienteExiste(RecebeString("\n Informe o nome do paciente a editar: "));
+                int indexEditar = repositorioPaciente.EsteItemExiste(RecebeString("\n Informe o nome do paciente a editar: "));
                 
                 if (indexEditar == -1) PacienteNaoCadastrado(ref sair, ref repetir);
                 else NomeValidoParaEdicao(indexEditar, ref sair, ref repetir);
@@ -91,11 +92,11 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             CabecalhoPaciente();
             Console.WriteLine("\t\t    Excluir");
 
-            if (repositorioPaciente.NaoExistemPacientes()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
             else
             {
                 Visualizar();
-                int indexExcluir = repositorioPaciente.EstePacienteExiste(RecebeString("\n Informe o nome do paciente a excluir: "));
+                int indexExcluir = repositorioPaciente.EsteItemExiste(RecebeString("\n Informe o nome do paciente a excluir: "));
 
                 if (indexExcluir == -1) PacienteNaoCadastrado(ref sair, ref repetir);
                 else NomeValidoParaExclusao(indexExcluir);
@@ -177,9 +178,9 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         {
             CabecalhoVisualizar();
 
-            for (int i = 0; i < repositorioPaciente.pacientes.Length; i++) if (repositorioPaciente.pacientes[i] != null)
+            for (int i = 0; i < repositorioPaciente.entidade.Length; i++) if (repositorioPaciente.entidade[i] != null)
                 {
-                    Console.Write($" {repositorioPaciente.pacientes[i].nome}\t| {repositorioPaciente.pacientes[i].cpf}\t\t| {repositorioPaciente.pacientes[i].endereco}\t\t| {repositorioPaciente.pacientes[i].cartaoSUS}" +
+                    Console.Write($" {repositorioPaciente.entidade[i].nome}\t| {repositorioPaciente.entidade[i].cpf}\t\t| {repositorioPaciente.entidade[i].endereco}\t\t| {repositorioPaciente.entidade[i].cartaoSUS}" +
                                   $"\n------------------------------------------------------\n");
                 }
         }
@@ -188,7 +189,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         #region Edição
         public void NomeValidoParaEdicao(int indexEditar, ref bool sair, ref bool repetir)
         {
-            var objetoAuxiliar = repositorioPaciente.pacientes[indexEditar];
+            var objetoAuxiliar = repositorioPaciente.entidade[indexEditar];
 
             MenuParaEdicao(ref sair, ref repetir, objetoAuxiliar, out bool editado);
 
@@ -198,7 +199,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
                 if (editado) RealizadoComSucesso("editado");
             }
         }
-        public void MenuParaEdicao(ref bool sair, ref bool repetir, Paciente objetoAuxiliar, out bool editado)
+        public void MenuParaEdicao(ref bool sair, ref bool repetir, Entidades objetoAuxiliar, out bool editado)
         {
             CabecalhoPaciente();
             VisualizarParaEdicao(objetoAuxiliar);
@@ -208,7 +209,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             {
                 case "1":
                     string nome = RecebeString("\n Informe o novo nome: ");
-                    if (repositorioPaciente.EstePacienteExiste(nome) == -1) objetoAuxiliar.nome = nome;
+                    if (repositorioPaciente.EsteItemExiste(nome) == -1) objetoAuxiliar.nome = nome;
                     else
                     {
                         PacienteJaExiste(ref sair, ref repetir);
@@ -224,7 +225,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             }
             if (opcao == "") repetir = true;
         }
-        public void VisualizarParaEdicao(Paciente objetoAuxiliar)
+        public void VisualizarParaEdicao(Entidades objetoAuxiliar)
         {
             Console.WriteLine("\t\t    Editar");
             CabecalhoVisualizar();

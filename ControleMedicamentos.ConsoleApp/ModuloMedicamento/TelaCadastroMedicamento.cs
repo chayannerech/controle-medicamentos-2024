@@ -2,7 +2,7 @@
 
 namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
 {
-    internal class TelaCadastroMedicamento
+    internal class TelaCadastroMedicamento : TelaCadastro
     {
         public RepositorioMedicamento repositorioMedicamento = new RepositorioMedicamento();
 
@@ -11,28 +11,28 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
             bool repetir = false;
             do
             {
-                CabecalhoMedicamentos();
+                CabecalhoEntidade("MEDICAMENTOS");
                 Console.WriteLine("------------------------------------------------");
-                
+
                 repetir = false;
                 string opcao = RecebeString("\n       1. Cadastrar um novo medicamento\n\t   2. Pesquisar medicamento\n\t     3. Visualizar estoque\n\t     4. Editar medicamento\n\t     5. Excluir medicamento\n\n\t R. Retornar ao menu principal\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
                 switch (opcao)
                 {
-                    case "1": CadastroMedicamento(ref sair, ref repetir); break;
+                    case "1": CadastrarItem(ref sair, ref repetir); break;
                     case "2": PesquisaMedicamento(ref sair, ref repetir); break;
                     case "3": VisualizarMedicamentos(ref sair, ref repetir); break;
                     case "4": EditarMedicamentos(ref sair, ref repetir); break;
                     case "5": ExcluirMedicamentos(ref sair, ref repetir); break;
                     case "S": sair = true; break;
                     case "R": break;
-                    default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+                    default: OpcaoInvalida(ref repetir); break;
                 }
             }
             while (repetir);
         }
-        public void CadastroMedicamento(ref bool sair, ref bool repetir)
+        protected override void CadastrarItem(ref bool sair, ref bool repetir)
         {
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
@@ -52,10 +52,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
         }
         public void PesquisaMedicamento(ref bool sair, ref bool repetir)
         {
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             int index = repositorioMedicamento.EsteItemExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do medicamento: "));
 
-            if (index == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+            if (index == -1) ItemNaoCadastrado(ref sair, ref repetir, "medicamento", this);
             else 
             {
                 Console.WriteLine($"\n Medicamento = {repositorioMedicamento.entidade[index].nome}\n Fornecedor = {repositorioMedicamento.entidade[index].fornecedor}");
@@ -66,10 +66,10 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
         }
         public void VisualizarMedicamentos(ref bool sair, ref bool repetir)
         {
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             Console.WriteLine("\t\t  Visualizar");
 
-            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "medicamentos cadastrados");
             else
             {
                 Visualizar();
@@ -78,92 +78,38 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
         }
         public void EditarMedicamentos(ref bool sair, ref bool repetir)
         {
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             Console.WriteLine("\t\t    Editar");
 
-            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "medicamentos cadastrados");
             else
             {
                 Visualizar();
                 int indexEditar = repositorioMedicamento.EsteItemExiste(RecebeString("\n Informe o nome do medicamento a editar: "));
 
-                if (indexEditar == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+                if (indexEditar == -1) ItemNaoCadastrado(ref sair, ref repetir, "medicamento", this);
                 else NomeValidoParaEdicao(indexEditar, ref sair, ref repetir);
             }
         }
         public void ExcluirMedicamentos(ref bool sair, ref bool repetir)
         {
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             Console.WriteLine("\t\t    Excluir");
 
-            if (repositorioMedicamento.NaoExistemItens()) EstoqueVazio(ref sair, ref repetir);
+            if (repositorioMedicamento.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "medicamentos cadastrados");
             else
             {
                 Visualizar();
                 int indexExcluir = repositorioMedicamento.EsteItemExiste(RecebeString("\n Informe o nome do medicamento a excluir: "));
 
-                if (indexExcluir == -1) MedicamentoNaoCadastrado(ref sair, ref repetir);
+                if (indexExcluir == -1) ItemNaoCadastrado(ref sair, ref repetir, "medicamento", this);
                 else NomeValidoParaExclusao(indexExcluir);
             }
         }
 
         #region Métodos Auxiliares
-        #region Gerais
-        public void CabecalhoMedicamentos()
-        {
-            Console.Clear();
-            Console.WriteLine("------------------------------------------------\n  Controle de Medicamentos dos Postos de Saúde\n------------------------------------------------");
-            Console.WriteLine("\t    GESTÃO DE MEDICAMENTOS");
-        }
-        public string RecebeString(string texto)
-        {
-            Console.Write(texto);
-            return Console.ReadLine().ToUpper();
-        }
-        public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
-        {
-            Notificação(ConsoleColor.Red, "\n        Opção inválida. Tente novamente ");
-            Console.ReadLine();
-            repetir = true;
-        }
-        public void Notificação(ConsoleColor cor, string texto)
-        {
-            Console.ForegroundColor = cor;
-            Console.Write(texto);
-            Console.ResetColor();
-        }
-        public void RealizadoComSucesso(string texto)
-        {
-            Notificação(ConsoleColor.Green, $"\n\n       Requisição {texto} com sucesso!\n");
-            RecebeString("     'Enter' para voltar ao menu principal \n                       ");
-        }
-        public void ParaRetornarAoMenu(ref bool sair, ref bool repetir)
-        {
-            string opcao = RecebeString("\n     'Enter' para voltar ao Menu Principal\n    'R' para voltar ao Menu de Medicamentos\n\t       'S' para Sair\n\n\t\t   Digite: ");
-            if (opcao == "") ;
-            else if (opcao == "R") repetir = true;
-            else if (opcao == "S") sair = true;
-            else OpcaoInvalida(ref opcao, ref sair, ref repetir);
-        }
-        #endregion
 
         #region Cadastro
-        public int RecebeInt(string texto)
-        {
-            Console.Write(texto);
-            char[] valorEmChar = Console.ReadLine().ToCharArray();
-            string quantidade = ""; //O intuito é testar caracter por caracter e depois concatenar numa string, pra converter pra int
-
-            for (int i = 0; i < valorEmChar.Length; i++) if (Convert.ToInt32(valorEmChar[i]) >= 48 && Convert.ToInt32(valorEmChar[i]) <= 57) quantidade += valorEmChar[i];
-            if (quantidade.Length != valorEmChar.Length) NaoEhNumero(ref quantidade, texto);
-
-            return Convert.ToInt32(quantidade);
-        }
-        public void NaoEhNumero(ref string quantidade, string texto)
-        {
-            Notificação(ConsoleColor.Red, "\n Não é um número! Tente novamente\n");
-            quantidade = Convert.ToString(RecebeInt(texto));//Para garantir que, ao sair do loop, o método "RecebeInt" não vai puxar a "quantidade" original (nula)
-        }
         public void MedicamentoJaExiste(int index, ref bool sair, ref bool repetir)
         {
             Notificação(ConsoleColor.Red, " Este medicamento já existe!\n");
@@ -173,33 +119,12 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
                 case "1": break;
                 case "2": repositorioMedicamento.AtualizarQnt(RecebeInt("\n Informe a nova quantidade: "), index); break;
                 case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
-            }
-        }
-        #endregion
-
-        #region Pesquisa
-        public void MedicamentoNaoCadastrado(ref bool sair, ref bool repetir)
-        {
-            Notificação(ConsoleColor.Red, "\n     Este medicamento ainda não foi cadastrado!\n");
-            string opcao = RecebeString("\n 1. Cadastrar medicamento\n R. Retornar\n S. Sair\n\n Digite: ");
-            switch (opcao)
-            {
-                case "1": CadastroMedicamento(ref sair, ref repetir); break;
-                case "R": repetir = true; break;
-                case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+                default: OpcaoInvalida(ref repetir); break;
             }
         }
         #endregion
 
         #region Visualizar
-        public void EstoqueVazio(ref bool sair, ref bool repetir)
-        {
-            Console.WriteLine("------------------------------------------------\n");
-            Notificação(ConsoleColor.Red, "      Não existem medicamentos em estoque\n");
-            ParaRetornarAoMenu(ref sair, ref repetir);
-        }
         public void CabecalhoVisualizar() => Notificação(ConsoleColor.Blue, "\n------------------------------------------------\n Nome\t| Descrição\t| Fornecedor\t| Qnt\n------------------------------------------------\n");
         public void Visualizar()
         {
@@ -234,7 +159,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
         public void MenuParaEdicao(ref bool sair, ref bool repetir, Entidades objetoAuxiliar, out bool editado)
         {
             Console.Clear();
-            CabecalhoMedicamentos();
+            CabecalhoEntidade("MEDICAMENTOS");
             VisualizarParaEdicao(objetoAuxiliar);
             editado = true;
             string opcao = RecebeString(" Ótimo! O que deseja Editar?\n 1. nome\n 2. descricao\n 3. fornecedor\n 4. quantidade em estoque\n 5. quantidade mínima \n\n R. para retornar\n S. para sair\n\n Digite: ");
@@ -256,7 +181,7 @@ namespace ControleMedicamentos.ConsoleApp.ModuloMedicamento
                 case "5": objetoAuxiliar.quantidadeCritica = RecebeInt("\n Informe a nova quantidade mínima: "); break;
                 case "R": repetir = true; break;
                 case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+                default: OpcaoInvalida(ref repetir); break;
             }
             if (opcao == "") repetir = true;
         }

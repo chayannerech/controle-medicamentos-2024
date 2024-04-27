@@ -1,4 +1,5 @@
-﻿using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
+﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
+using ControleMedicamentos.ConsoleApp.ModuloMedicamento;
 using ControleMedicamentos.ConsoleApp.ModuloPaciente;
 using ControleMedicamentos.ConsoleApp.ModuloRequisicao;
 using Controlepacientes.ConsoleApp.ModuloPaciente;

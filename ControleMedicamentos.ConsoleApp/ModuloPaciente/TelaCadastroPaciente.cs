@@ -3,7 +3,7 @@ using ControleMedicamentos.ConsoleApp.ModuloPaciente;
 
 namespace Controlepacientes.ConsoleApp.ModuloPaciente
 {
-    internal class TelaCadastroPaciente
+    internal class TelaCadastroPaciente : TelaCadastro
     {
         public RepositorioPaciente repositorioPaciente = new RepositorioPaciente();
 
@@ -12,28 +12,28 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
             bool repetir = false;
             do
             {
-                CabecalhoPaciente();
+                CabecalhoEntidade("PACIENTE");
                 Console.WriteLine("------------------------------------------------");
 
                 repetir = false;
                 string opcao = RecebeString("\n        1. Cadastrar um novo paciente\n\t    2. Pesquisar paciente\n\t   3. Visualizar pacientes\n\t      4. Editar paciente\n\t     5. Excluir paciente\n\n\t R. Retornar ao menu principal\n\t\t   S. Sair\n------------------------------------------------\n\n Digite: ");
                 switch (opcao)
                 {
-                    case "1": CadastroPaciente(ref sair, ref repetir); break;
+                    case "1": CadastrarItem(ref sair, ref repetir); break;
                     case "2": PesquisaPaciente(ref sair, ref repetir); break;
                     case "3": VisualizarPaciente(ref sair, ref repetir); break;
                     case "4": EditarPaciente(ref sair, ref repetir); break;
                     case "5": ExcluirPaciente(ref sair, ref repetir); break;
                     case "S": sair = true; break;
                     case "R": break;
-                    default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+                    default: OpcaoInvalida(ref repetir); break;
                 }
             }
             while (repetir);
         }
-        public void CadastroPaciente(ref bool sair, ref bool repetir)
+        protected override void CadastrarItem(ref bool sair, ref bool repetir)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             Console.WriteLine("\t\t  Cadastrar\n------------------------------------------------");
 
             string nome = RecebeString("\n Informe o nome: ");
@@ -52,10 +52,10 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         }
         public void PesquisaPaciente(ref bool sair, ref bool repetir)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             int index = repositorioPaciente.EsteItemExiste(RecebeString("\t\t    Pesquisar\n------------------------------------------------\n\n Informe o nome do paciente: "));
 
-            if (index == -1) PacienteNaoCadastrado(ref sair, ref repetir);
+            if (index == -1) ItemNaoCadastrado(ref sair, ref repetir, "paciente", this);
             else
             {
                 Console.WriteLine($"\n paciente = {repositorioPaciente.entidade[index].nome}\n CPF = {repositorioPaciente.entidade[index].cpf}\n Endereço = {repositorioPaciente.entidade[index].endereco}\n Cartão SUS = {repositorioPaciente.entidade[index].cartaoSUS}\n");
@@ -64,10 +64,10 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         }
         public void VisualizarPaciente(ref bool sair, ref bool repetir)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             Console.WriteLine("\t\t  Visualizar");
 
-            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "pacientes cadastrados");
             else
             {
                 Visualizar();
@@ -76,76 +76,38 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         }
         public void EditarPaciente(ref bool sair, ref bool repetir)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             Console.WriteLine("\t\t    Editar");
 
-            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "pacientes cadastrados");
             else
             {
                 Visualizar();
                 int indexEditar = repositorioPaciente.EsteItemExiste(RecebeString("\n Informe o nome do paciente a editar: "));
                 
-                if (indexEditar == -1) PacienteNaoCadastrado(ref sair, ref repetir);
+                if (indexEditar == -1) ItemNaoCadastrado(ref sair, ref repetir, "paciente", this);
                 else NomeValidoParaEdicao(indexEditar, ref sair, ref repetir);
             }
         }
         public void ExcluirPaciente(ref bool sair, ref bool repetir)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             Console.WriteLine("\t\t    Excluir");
 
-            if (repositorioPaciente.NaoExistemItens()) SemPacientes(ref sair, ref repetir);
+            if (repositorioPaciente.NaoExistemItens()) AindaNaoExistemItens(ref sair, ref repetir, "pacientes cadastrados");
             else
             {
                 Visualizar();
                 int indexExcluir = repositorioPaciente.EsteItemExiste(RecebeString("\n Informe o nome do paciente a excluir: "));
 
-                if (indexExcluir == -1) PacienteNaoCadastrado(ref sair, ref repetir);
+                if (indexExcluir == -1) ItemNaoCadastrado(ref sair, ref repetir, "paciente", this);
                 else NomeValidoParaExclusao(indexExcluir);
             }
         }
 
         #region Métodos Auxiliares
-        #region Gerais
-        public void CabecalhoPaciente()
-        {
-            Console.Clear();
-            Console.WriteLine("------------------------------------------------\n  Controle de Medicamentos dos Postos de Saúde\n------------------------------------------------");
-            Console.WriteLine("\t      GESTÃO DE PACIENTES");
-        }
-        public void OpcaoInvalida(ref string opcao, ref bool sair, ref bool repetir)
-        {
-            Notificação(ConsoleColor.Red, "\n        Opção inválida. Tente novamente ");
-            Console.ReadLine();
-            repetir = true;
-        }
-        public void Notificação(ConsoleColor cor, string texto)
-        {
-            Console.ForegroundColor = cor;
-            Console.Write(texto);
-            Console.ResetColor();
-        }
-        public void RealizadoComSucesso(string texto)
-        {
-            Notificação(ConsoleColor.Green, $"\n\n       Requisição {texto} com sucesso!\n");
-            RecebeString("     'Enter' para voltar ao menu principal \n                       ");
-        }
-        public void ParaRetornarAoMenu(ref bool sair, ref bool repetir)
-        {
-            string opcao = RecebeString("\n     'Enter' para voltar ao Menu Principal\n    'R' para voltar ao Menu de Requisições\n\t       'S' para Sair\n\n\t\t   Digite: ");
-            if (opcao == "") ;
-            else if (opcao == "R") repetir = true;
-            else if (opcao == "S") sair = true;
-            else OpcaoInvalida(ref opcao, ref sair, ref repetir);
-        }
-        #endregion
 
         #region Cadastro
-        public string RecebeString(string texto)
-        {
-            Console.Write(texto);
-            return Console.ReadLine().ToUpper();
-        }
         public void PacienteJaExiste(ref bool sair, ref bool repetir)
         {
             Notificação(ConsoleColor.Red, " Este paciente já existe!\n");
@@ -153,28 +115,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         }
         #endregion
 
-        #region Pesquisa
-        public void PacienteNaoCadastrado(ref bool sair, ref bool repetir)
-        {
-            Notificação(ConsoleColor.Red, "\n     Este paciente ainda não foi cadastrado!\n");
-            string opcao = RecebeString("\n 1. Cadastrar paciente\n R. Retornar\n S. Sair\n\n Digite: ");
-            switch (opcao)
-            {
-                case "1": CadastroPaciente(ref sair, ref repetir); break;
-                case "R": repetir = true; break;
-                case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
-            }
-        }
-        #endregion
-
         #region Visualizar
-        public void SemPacientes(ref bool sair, ref bool repetir)
-        {
-            Console.WriteLine("------------------------------------------------\n");
-            Notificação(ConsoleColor.Red, "      Não existem pacientes cadastrados\n");
-            ParaRetornarAoMenu(ref sair, ref repetir);
-        }
         public void CabecalhoVisualizar() => Notificação(ConsoleColor.Blue, "\n------------------------------------------------------\n Nome\t| CPF\t\t| Endereço\t| Cartão SUS\n------------------------------------------------------\n");
         public void Visualizar()
         {
@@ -204,7 +145,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
         }
         public void MenuParaEdicao(ref bool sair, ref bool repetir, Entidades objetoAuxiliar, out bool editado)
         {
-            CabecalhoPaciente();
+            CabecalhoEntidade("PACIENTE");
             VisualizarParaEdicao(objetoAuxiliar);
             editado = true;
             string opcao = RecebeString(" Ótimo! O que deseja Editar?\n 1. nome\n 2. CPF\n 3. endereço\n 4. cartão SUS\n\n R. para retornar\n S. para sair\n\n Digite: ");
@@ -224,7 +165,7 @@ namespace Controlepacientes.ConsoleApp.ModuloPaciente
                 case "4": objetoAuxiliar.cartaoSUS = RecebeString("\n Informe o novo cartão SUS: "); break;
                 case "R": repetir = true; break;
                 case "S": sair = true; break;
-                default: OpcaoInvalida(ref opcao, ref sair, ref repetir); break;
+                default: OpcaoInvalida(ref repetir); break;
             }
             if (opcao == "") repetir = true;
         }

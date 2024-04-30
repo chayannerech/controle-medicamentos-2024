@@ -1,7 +1,7 @@
 ﻿using ControleMedicamentos.ConsoleApp.Compartilhado;
 namespace ControleMedicamentos.ConsoleApp.ModuloRequisicao
 {
-    internal class Requisicao : Entidades
+    internal class Requisicao : EntidadeBase
     {
         public Requisicao(string medicamento, string paciente, int posologia, DateTime dataValidade, int id)
         {

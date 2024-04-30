@@ -1,6 +1,6 @@
 ﻿namespace ControleMedicamentos.ConsoleApp.Compartilhado
 {
-    internal class Entidades
+    internal class EntidadeBase
     {
         public string nome { get; set; }
         public string descricao { get; set; }

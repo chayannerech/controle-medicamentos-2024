@@ -2,26 +2,23 @@
 
 namespace ControleMedicamentos.ConsoleApp.Compartilhado
 {
-    internal class Repositorio
+    internal class RepositorioBase
     {
-        public Entidades[] entidade = new Entidades[50];
-        public Entidades[] entidadesMovimentadas = new Entidades[50];
+        public EntidadeBase[] entidade = new EntidadeBase[50];
+        public EntidadeBase[] entidadesMovimentadas = new EntidadeBase[50];
         public int contador = 0, qntCritica, contadorMovimentadas = 0;
 
-        public void Cadastrar(Entidades novaEntidade)
+        public void Cadastrar(EntidadeBase novaEntidade)
         {
             entidade[contador] = novaEntidade;
             contador++;
         }
-        public void Editar(Entidades editarEntidade, int indexEditar) => entidade[indexEditar] = editarEntidade;
+        public void Editar(EntidadeBase editarEntidade, int indexEditar) => entidade[indexEditar] = editarEntidade;
         public void Excluir(int indexExcluir) => entidade[indexExcluir] = null;
         public int EsteItemExiste(string pesquisar)
         {
             int index = -1;
-            
             for (int i = 0; i < entidade.Length; i++) if (entidade[i] != null) if (entidade[i].id != null) if (entidade[i].id == Convert.ToInt32(pesquisar)) index = i;
-            for (int i = 0; i < entidade.Length; i++) if (entidade[i] != null) if (entidade[i].nome != null) if (entidade[i].nome == pesquisar) index = i;
-
             return index;
         }
         public bool NaoExistemItens()
@@ -31,7 +28,7 @@ namespace ControleMedicamentos.ConsoleApp.Compartilhado
         }
         public void AtualizarQnt(int quantidade, int index) => entidade[index].quantidade = quantidade;
         public bool QuantidadeEstaCritica(int i) => entidade[i].quantidade <= entidade[i].quantidadeCritica;
-        public void DarBaixa(Entidades[] medicamentoMovimentado, int indexDarBaixa)
+        public void DarBaixa(EntidadeBase[] medicamentoMovimentado, int indexDarBaixa)
         {
             entidadesMovimentadas[contadorMovimentadas] = entidade[indexDarBaixa];
             contadorMovimentadas++;
